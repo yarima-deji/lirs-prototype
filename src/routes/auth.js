@@ -1,16 +1,16 @@
 import { Router } from 'express';
-
 const router = Router();
 
-// Stub for POST /auth/register
+// POST /auth/register
 router.post('/register', (req, res) => {
-  res.send('Register endpoint');
+  // TODO: implement registration logic
+  res.status(201).json({ message: 'User registration endpoint' });
 });
 
-// Stub for POST /auth/login
+// POST /auth/login
 router.post('/login', (req, res) => {
-  res.send('Login endpoint');
+  // TODO: implement login logic
+  res.status(200).json({ message: 'User login endpoint' });
 });
 
 export default router;
-
