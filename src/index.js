@@ -22,8 +22,8 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
+// Error handler (omit unused next)
+app.use((err, req, res) => {
   console.error(err);
   res.status(500).json({ error: 'Server Error' });
 });
@@ -38,5 +38,7 @@ initUserTable()
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
