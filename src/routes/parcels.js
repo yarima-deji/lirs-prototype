@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js';
+import { createParcel } from '../models/parcelModel.js';
 // import controller functions when ready
 
 const router = Router();
@@ -8,9 +9,15 @@ const router = Router();
 router.use(authenticateToken);
 
 // POST /parcels — Create new parcel
-router.post('/', authorizeRole('admin', 'officer'), (req, res) => {
-  // TODO: call createParcel and return 201
-  res.status(201).json({ message: 'Create parcel endpoint' });
+router.post('/', authorizeRole('admin', 'officer'), async (req, res, next) => {
+  try {
+    const parcelData = req.body; 
+    // Expect parcel_id, owner_name, latitude, longitude, area, classification
+    const newParcel = await createParcel(parcelData);
+    res.status(201).json(newParcel);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // GET /parcels — List parcels with optional filters

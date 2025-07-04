@@ -1,22 +1,24 @@
 import db from '../db/index.js';
 
 // Initialize parcels table
-export async function initParcelTable() {
+// src/models/parcelModel.js
+export async function createParcel({
+  parcel_id,
+  owner_name,
+  latitude,
+  longitude,
+  area,
+  classification,
+}) {
   const sql = `
-    CREATE TABLE IF NOT EXISTS parcels (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      parcel_id VARCHAR(50) UNIQUE NOT NULL,
-      owner_name VARCHAR(100) NOT NULL,
-      latitude DOUBLE PRECISION,
-      longitude DOUBLE PRECISION,
-      area DOUBLE PRECISION,
-      classification VARCHAR(50),
-      status VARCHAR(20) DEFAULT 'active',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    );
+    INSERT INTO parcels
+      (parcel_id, owner_name, latitude, longitude, area, classification)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *;
   `;
-  await db.query(sql);
+  const values = [parcel_id, owner_name, latitude, longitude, area, classification];
+  const result = await db.query(sql, values);
+  return result.rows[0];
 }
 
 // CRUD function stubs
