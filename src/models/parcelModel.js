@@ -20,7 +20,7 @@ export async function initParcelTable() {
 }
 
 // Create a new parcel
-enexport async function createParcel({
+export async function createParcel({
   parcel_id,
   owner_name,
   latitude,
@@ -76,7 +76,7 @@ export async function getParcels(filters = {}) {
   return result.rows;
 }
 
-// Retrieve a single parcel by its UUID
+// Retrieve a single parcel by its ID
 export async function getParcelById(id) {
   const result = await db.query(
     'SELECT * FROM parcels WHERE id = $1;',
@@ -87,7 +87,6 @@ export async function getParcelById(id) {
 
 // Update specified fields on a parcel
 export async function updateParcel(id, data) {
-  // Build dynamic SET clause
   const fields = [];
   const values = [];
   let idx = 1;
@@ -96,7 +95,6 @@ export async function updateParcel(id, data) {
     values.push(val);
     idx++;
   }
-  // Always update `updated_at`
   fields.push(`updated_at = now()`);
   const sql = `
     UPDATE parcels
