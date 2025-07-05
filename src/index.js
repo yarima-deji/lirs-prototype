@@ -1,7 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { initUserTable } from './models/userModel.js';
+import { initParcelTable } from './models/parcelModel.js';
 import authRoutes from './routes/auth.js';
+import parcelRoutes from './routes/parcels.js';
 
 dotenv.config();
 const app = express();
@@ -17,12 +19,15 @@ app.get('/', (req, res) => {
 // Auth routes
 app.use('/auth', authRoutes);
 
+// Parcel routes
+app.use('/parcels', parcelRoutes);
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-// Error handler (omit unused next)
+// Error handler
 app.use((err, req, res) => {
   console.error(err);
   res.status(500).json({ error: 'Server Error' });
@@ -30,15 +35,14 @@ app.use((err, req, res) => {
 
 // Initialize DB tables before starting the server
 initUserTable()
-  .then(() => console.log('✅ User table is ready'))
+  .then(() => initParcelTable())
+  .then(() => console.log('✅ DB tables ready'))
   .catch(err => {
-    console.error('❌ Failed to initialize user table', err);
+    console.error('❌ Failed to initialize database tables', err);
     process.exit(1);
   });
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
