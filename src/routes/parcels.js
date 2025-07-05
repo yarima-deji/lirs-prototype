@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js';
-import { createParcel, getParcels } from '../models/parcelModel.js';
+import {
+  createParcel,
+  getParcels,
+  getParcelById,
+  updateParcel,
+  softDeleteParcel,
+} from '../models/parcelModel.js';
 
 const router = Router();
 
@@ -36,12 +42,14 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// GET /parcels/:id — Get parcel details
+// GET /parcels/:id — Retrieve parcel details
 router.get('/:id', async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    // TODO: implement getParcelById
-    res.json({ message: `Get parcel details endpoint for id ${id}` });
+    const parcel = await getParcelById(req.params.id);
+    if (!parcel) {
+      return res.status(404).json({ error: 'Parcel not found' });
+    }
+    res.json(parcel);
   } catch (err) {
     next(err);
   }
@@ -50,19 +58,23 @@ router.get('/:id', async (req, res, next) => {
 // PUT /parcels/:id — Update parcel
 router.put('/:id', authorizeRole('admin', 'officer'), async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    // TODO: implement updateParcel
-    res.json({ message: `Update parcel endpoint for id ${id}` });
+    const updated = await updateParcel(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ error: 'Parcel not found' });
+    }
+    res.json(updated);
   } catch (err) {
     next(err);
   }
 });
 
-// DELETE /parcels/:id — Soft-delete parcel
+// DELETE /parcels/:id — Soft‑delete parcel
 router.delete('/:id', authorizeRole('admin'), async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    // TODO: implement softDeleteParcel
+    const deleted = await softDeleteParcel(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Parcel not found' });
+    }
     res.status(204).end();
   } catch (err) {
     next(err);

@@ -76,11 +76,47 @@ export async function getParcels(filters = {}) {
   return result.rows;
 }
 
-// Get a single parcel by ID (stub for later)
-export async function getParcelById(id) { /* TODO */ }
+// Retrieve a single parcel by its UUID
+export async function getParcelById(id) {
+  const result = await db.query(
+    'SELECT * FROM parcels WHERE id = $1;',
+    [id]
+  );
+  return result.rows[0];
+}
 
-// Update a parcel (stub for later)
-export async function updateParcel(id, data) { /* TODO */ }
+// Update specified fields on a parcel
+export async function updateParcel(id, data) {
+  // Build dynamic SET clause
+  const fields = [];
+  const values = [];
+  let idx = 1;
+  for (const [key, val] of Object.entries(data)) {
+    fields.push(`${key} = $${idx}`);
+    values.push(val);
+    idx++;
+  }
+  // Always update `updated_at`
+  fields.push(`updated_at = now()`);
+  const sql = `
+    UPDATE parcels
+    SET ${fields.join(', ')}
+    WHERE id = $${idx}
+    RETURNING *;
+  `;
+  values.push(id);
+  const result = await db.query(sql, values);
+  return result.rows[0];
+}
 
-// Soft-delete a parcel (stub for later)
-export async function softDeleteParcel(id) { /* TODO */ }
+// Soft‑delete: mark status = 'deleted'
+export async function softDeleteParcel(id) {
+  const result = await db.query(
+    `UPDATE parcels
+     SET status = 'deleted', updated_at = now()
+     WHERE id = $1
+     RETURNING *;`,
+    [id]
+  );
+  return result.rows[0];
+}
