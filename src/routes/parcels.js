@@ -7,6 +7,7 @@ import {
   updateParcel,
   softDeleteParcel,
 } from '../models/parcelModel.js';
+import { logAudit } from '../models/auditModel.js';
 
 const router = Router();
 
@@ -16,8 +17,15 @@ router.use(authenticateToken);
 // POST /parcels — Create new parcel
 router.post('/', authorizeRole('admin', 'officer'), async (req, res, next) => {
   try {
-    const parcelData = req.body; 
+    const parcelData = req.body;
     const newParcel = await createParcel(parcelData);
+    await logAudit({
+      userId: req.user.sub,
+      action: 'create',
+      entity: 'parcel',
+      entityId: newParcel.id,
+      details: { parcel_id: newParcel.parcel_id }
+    });
     res.status(201).json(newParcel);
   } catch (err) {
     next(err);
@@ -62,6 +70,13 @@ router.put('/:id', authorizeRole('admin', 'officer'), async (req, res, next) => 
     if (!updated) {
       return res.status(404).json({ error: 'Parcel not found' });
     }
+    await logAudit({
+      userId: req.user.sub,
+      action: 'update',
+      entity: 'parcel',
+      entityId: updated.id,
+      details: req.body
+    });
     res.json(updated);
   } catch (err) {
     next(err);
@@ -75,6 +90,13 @@ router.delete('/:id', authorizeRole('admin'), async (req, res, next) => {
     if (!deleted) {
       return res.status(404).json({ error: 'Parcel not found' });
     }
+    await logAudit({
+      userId: req.user.sub,
+      action: 'delete',
+      entity: 'parcel',
+      entityId: deleted.id,
+      details: {}
+    });
     res.status(204).end();
   } catch (err) {
     next(err);

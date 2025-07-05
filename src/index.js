@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { initUserTable } from './models/userModel.js';
 import { initParcelTable } from './models/parcelModel.js';
+import { initAuditTable } from './models/auditModel.js';
 import authRoutes from './routes/auth.js';
 import parcelRoutes from './routes/parcels.js';
 
@@ -41,6 +42,12 @@ initUserTable()
     console.error('❌ Failed to initialize database tables', err);
     process.exit(1);
   });
+
+initUserTable()
+  .then(() => initParcelTable())
+  .then(() => initAuditTable())
+  .then(() => console.log('✅ All DB tables ready'))
+  .catch(err => { console.error(err); process.exit(1); });
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
